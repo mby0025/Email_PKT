@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PayRupik | Email Writing Assessment</title>
+<style>
+:root{--brand:#243b80;--accent:#4d65c8;--bg:#f4f6fb;--ink:#202638;--muted:#667085;--line:#e3e7f0}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--ink);line-height:1.5}
+.wrap{max-width:1050px;margin:28px auto;padding:0 16px}.top{background:linear-gradient(120deg,#1d2f6f,#5268c7);color:#fff;padding:26px 30px;border-radius:16px 16px 0 0}
+.top h1{margin:0 0 5px;font-size:26px}.top p{margin:0;color:#e6eaff}.panel{background:#fff;padding:26px;border-radius:0 0 16px 16px;box-shadow:0 8px 30px #18264a12}
+.card{border:1px solid var(--line);border-radius:12px;padding:20px;margin:18px 0}.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+label{display:block;font-weight:700;margin:0 0 6px}input,textarea{width:100%;padding:12px;border:1px solid #cbd2e1;border-radius:8px;font:inherit;background:#fff;color:var(--ink)}
+textarea{min-height:210px;resize:vertical}input:focus,textarea:focus{outline:2px solid #c8d2ff;border-color:var(--accent)}
+button{border:0;border-radius:8px;padding:12px 18px;background:var(--brand);color:#fff;font-weight:700;font-size:15px;cursor:pointer}
+button.secondary{background:#edf0fb;color:var(--brand)}button:disabled{opacity:.55;cursor:not-allowed}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.muted{color:var(--muted);font-size:14px}.hidden{display:none!important}.error{color:#b42318;margin-top:12px}.success{color:#067647;margin-top:12px}
+.prompt{background:#f7f8fd;border-left:4px solid var(--accent);padding:14px;border-radius:8px;margin:10px 0 14px}
+.task h3{margin:0 0 8px}.task .hint{font-size:13px;color:var(--muted);margin-bottom:10px}
+.progress{height:8px;background:#e8ebf4;border-radius:99px;overflow:hidden;margin:12px 0}.progress>div{height:100%;background:#5268c7;width:0}
+.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{background:#f7f8fd;padding:14px;border-radius:10px}.stat b{display:block;font-size:22px;color:var(--brand)}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#f2f4fa}
+.small{font-size:13px}.score-input{max-width:90px}.admin-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+@media(max-width:650px){.row,.statgrid{grid-template-columns:1fr}.panel{padding:18px}.top{padding:22px}.top h1{font-size:22px}table{display:block;overflow-x:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <header class="top">
+  <h1>PayRupik – Email Writing Assessment</h1>
+  <p>Customer Support | Professional Email Communication</p>
+ </header>
+ <main class="panel">
+  <section id="login">
+   <div class="card">
+    <h2>Executive Login</h2>
+    <p class="muted">Enter your details to begin. You can submit this assessment only once using the same email address.</p>
+    <div class="row">
+     <div><label for="name">Full Name *</label><input id="name" autocomplete="name" placeholder="Enter your full name"></div>
+     <div><label for="email">Official Email ID *</label><input id="email" type="email" autocomplete="email" placeholder="name@example.com"></div>
+    </div>
+    <div style="margin-top:14px"><label for="assessmentDate">Assessment Date *</label><input id="assessmentDate" type="date"></div>
+    <div class="actions"><button id="startBtn" onclick="startAssessment()">Start Assessment</button><button class="secondary" onclick="showAdminLogin()">Admin Login</button></div>
+    <div id="loginMsg" class="error"></div>
+   </div>
+  </section>
+
+  <section id="assessment" class="hidden">
+   <div class="admin-row"><div><h2 style="margin:0">Email Writing Tasks</h2><div id="who" class="muted"></div></div><div class="muted">5 tasks · 20 marks each · 100 marks total</div></div>
+   <p>Read each customer situation and write a complete professional email. Include an appropriate subject line, greeting, clear explanation, next steps and closing.</p>
+   <div class="progress"><div id="progressFill"></div></div><div id="progressText" class="muted">0 of 5 tasks completed</div>
+   <div id="tasks"></div>
+   <div class="card">
+    <label for="declaration"><input id="declaration" type="checkbox" style="width:auto;margin-right:8px">I confirm that these email responses are written by me.</label>
+    <div class="actions"><button id="submitBtn" onclick="submitAssessment()">Submit All Emails</button></div>
+    <div id="submitMsg" class="error"></div>
+   </div>
+  </section>
+
+  <section id="submitted" class="hidden">
+   <div class="card"><h2>Submission received</h2><p>Your email-writing assessment has been submitted successfully. The trainer will review your responses and share the result.</p><p id="submittedInfo" class="muted"></p></div>
+  </section>
+
+  <section id="adminLogin" class="hidden">
+   <div class="card">
+    <h2>Admin Login</h2>
+    <label for="adminPassword">Admin Password</label><input id="adminPassword" type="password" placeholder="Enter admin password">
+    <div class="actions"><button onclick="adminLogin()">Login</button><button class="secondary" onclick="backToLogin()">Back</button></div>
+    <div id="adminLoginMsg" class="error"></div>
+   </div>
+  </section>
+
+  <section id="admin" class="hidden">
+   <div class="admin-row"><div><h2 style="margin:0">Trainer Dashboard</h2><p class="muted">Review submissions and assign marks for each task.</p></div><div class="actions"><button class="secondary" onclick="loadSubmissions()">Refresh</button><button class="secondary" onclick="downloadCSV()">Export CSV</button><button onclick="logoutAdmin()">Logout</button></div></div>
+   <div id="adminStats" class="statgrid"></div>
+   <div id="submissionList"></div>
+   <div id="reviewBox" class="card hidden"></div>
+  </section>
+ </main>
+</div>
+<script>
+const BACKEND_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+const TASKS = [
+ {id:1,title:"Settlement Request",prompt:"A customer emails PayRupik stating that they are facing a serious financial difficulty and cannot repay the full outstanding loan amount. The customer requests a settlement. Draft a reply acknowledging the concern, explaining the applicable process, requesting relevant supporting documents and avoiding any promise of approval or a specific settlement amount.",hint:"Training reference: settlement may be considered for valid reasons. Supporting documents may include a bank statement for financial issues. The customer should email documents to service@payrupikloan.in. A Settlement Letter is provided after settlement payment."},
+ {id:2,title:"Foreclosure Amount Clarification",prompt:"A customer says the unpaid amount shown in the PayRupik App is lower than the EMI amount mentioned in the KFS and asks why the amounts are different. Draft a clear reply explaining the difference between regular scheduled repayment and eligible foreclosure, and guide the customer on the next step.",hint:"Training reference: for eligible foreclosure, interest for the remaining loan period may be waived. The app's Unpaid Amount reflects the amount currently payable. Foreclosure is after the 24-hour cooling period and before the due date; it is not allowed in overdue cases."},
+ {id:3,title:"Payment Failed but Amount Debited",prompt:"A customer reports that a repayment transaction failed in the app, but the amount has been debited from their bank account. Draft a reassuring email explaining the verification process and expected refund timeline without guaranteeing a refund before verification.",hint:"Training reference: verify the transaction with the Team Lead through the Easebuzz portal. A failed-but-debited amount is expected to be refunded within 5–7 working days, subject to verification and the payment provider's process."},
+ {id:4,title:"Loan Closure and NDC Request",prompt:"A customer confirms that all loan dues have been paid and requests a No Due Certificate (NDC). Draft a professional response explaining what the NDC confirms and the expected sharing timeline after loan closure.",hint:"Training reference: the NDC confirms that the loan is fully paid and no dues are pending. It is shared within 24 hours after loan closure."},
+ {id:5,title:"Overdue Fee Waiver Request",prompt:"A customer requests a 100% waiver of overdue charges and says another team member promised a full waiver. Draft a response that acknowledges the request, avoids confirming an unverified promise, explains that the case will be checked through the appropriate process and does not promise a waiver.",hint:"Training reference: do not directly offer or promise a waiver. Verify the customer's current DPD and inform the Team Lead. Waivers apply only to eligible overdue fees and depend on the applicable DPD bracket and authorization."}
+];
+let session=null, adminKey=null, submissions=[];
+const $=id=>document.getElementById(id);
+function api(payload){
+ if(BACKEND_URL.includes("PASTE_YOUR")) return Promise.reject(new Error("Connect the Apps Script Web App URL in index.html first."));
+ const body=new URLSearchParams(); body.set("payload",JSON.stringify(payload));
+ return fetch(BACKEND_URL,{method:"POST",body}).then(r=>r.json());
+}
+function showOnly(id){["login","assessment","submitted","adminLogin","admin"].forEach(x=>$(x).classList.toggle("hidden",x!==id));}
+function today(){return new Date().toISOString().slice(0,10)}
+$("assessmentDate").value=today();
+function startAssessment(){
+ const name=$("name").value.trim(),email=$("email").value.trim().toLowerCase(),date=$("assessmentDate").value;
+ $("loginMsg").textContent="";
+ if(!name||!email||!date){$("loginMsg").textContent="Please complete all required fields.";return}
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){$("loginMsg").textContent="Enter a valid email address.";return}
+ $("startBtn").disabled=true;
+ api({action:"check",email}).then(r=>{
+  if(!r.ok)throw new Error(r.error||"Unable to check submission.");
+  if(r.exists){$("loginMsg").textContent="An assessment has already been submitted using this email address.";return}
+  session={name,email,date};$("who").textContent=`${name} · ${email} · ${date}`;
+  renderTasks();showOnly("assessment");
+ }).catch(e=>$("loginMsg").textContent=e.message).finally(()=>$("startBtn").disabled=false);
+}
+function renderTasks(){
+ $("tasks").innerHTML=TASKS.map(t=>`<article class="card task"><h3>Task ${t.id}: ${esc(t.title)}</h3><div class="prompt">${esc(t.prompt)}</div><div class="hint">${esc(t.hint)}</div><label for="subject${t.id}">Email Subject *</label><input id="subject${t.id}" maxlength="180" placeholder="Enter a suitable subject line"><div style="margin-top:12px"><label for="body${t.id}">Email Response *</label><textarea id="body${t.id}" maxlength="6000" placeholder="Write your complete customer email here..."></textarea></div></article>`).join("");
+ $("tasks").querySelectorAll("input,textarea").forEach(el=>el.addEventListener("input",updateProgress));
+ updateProgress();
+}
+function updateProgress(){
+ const n=TASKS.filter(t=>$("subject"+t.id).value.trim()&&$("body"+t.id).value.trim()).length;
+ $("progressFill").style.width=(n/TASKS.length*100)+"%";$("progressText").textContent=`${n} of ${TASKS.length} tasks completed`;
+}
+function submitAssessment(){
+ if(!$("declaration").checked){$("submitMsg").textContent="Please confirm the declaration before submitting.";return}
+ const answers=TASKS.map(t=>({taskId:t.id,title:t.title,subject:$("subject"+t.id).value.trim(),body:$("body"+t.id).value.trim()}));
+ const missing=answers.find(a=>!a.subject||!a.body);
+ if(missing){$("submitMsg").textContent=`Please complete Task ${missing.taskId} (subject and email response).`;return}
+ if(!confirm("Submit all five email responses? You cannot submit again using the same email address."))return;
+ $("submitBtn").disabled=true;$("submitBtn").textContent="Submitting...";
+ api({action:"submit",...session,answers}).then(r=>{
+  if(!r.ok)throw new Error(r.error||"Submission failed.");
+  showOnly("submitted");$("submittedInfo").textContent=`Name: ${session.name} | Email: ${session.email} | Submitted: ${r.submittedOn||""}`;
+ }).catch(e=>{$("submitMsg").textContent=e.message;$("submitBtn").disabled=false;$("submitBtn").textContent="Submit All Emails";});
+}
+function showAdminLogin(){showOnly("adminLogin")}
+function backToLogin(){showOnly("login")}
+function adminLogin(){
+ const password=$("adminPassword").value;
+ $("adminLoginMsg").textContent="";
+ api({action:"adminLogin",password}).then(r=>{
+  if(!r.ok)throw new Error(r.error||"Incorrect password.");
+  adminKey=password;showOnly("admin");loadSubmissions();
+ }).catch(e=>$("adminLoginMsg").textContent=e.message);
+}
+function logoutAdmin(){adminKey=null;submissions=[];showOnly("login")}
+function loadSubmissions(){
+ $("submissionList").textContent="Loading submissions...";
+ api({action:"adminList",password:adminKey}).then(r=>{
+  if(!r.ok)throw new Error(r.error||"Could not load submissions.");
+  submissions=r.submissions||[];renderAdmin();
+ }).catch(e=>$("submissionList").textContent=e.message);
+}
+function renderAdmin(){
+ const n=submissions.length,graded=submissions.filter(s=>s.graded).length;
+ $("adminStats").innerHTML=`<div class="stat"><b>${n}</b>Total submissions</div><div class="stat"><b>${graded}</b>Graded</div><div class="stat"><b>${n-graded}</b>Pending review</div>`;
+ if(!n){$("submissionList").innerHTML='<p class="muted">No submissions received yet.</p>';return}
+ $("submissionList").innerHTML=`<div style="overflow-x:auto"><table><thead><tr><th>Executive</th><th>Email</th><th>Date</th><th>Submitted</th><th>Score</th><th>Status</th><th>Action</th></tr></thead><tbody>${submissions.map((s,i)=>`<tr><td>${esc(s.name)}</td><td>${esc(s.email)}</td><td>${esc(s.assessmentDate)}</td><td>${esc(s.submittedOn)}</td><td>${s.graded?esc(s.totalScore+"/100"):"—"}</td><td>${s.graded?"Graded":"Pending"}</td><td><button class="secondary" onclick="openReview(${i})">Review</button></td></tr>`).join("")}</tbody></table></div>`;
+}
+function openReview(i){
+ const s=submissions[i],scores=s.scores||{},feedback=s.feedback||{};
+ $("reviewBox").classList.remove("hidden");
+ $("reviewBox").innerHTML=`<h3>Review: ${esc(s.name)} (${esc(s.email)})</h3>${TASKS.map(t=>{const a=(s.answers||[]).find(x=>Number(x.taskId)===t.id)||{};return `<div class="card"><h4>Task ${t.id}: ${esc(t.title)}</h4><p><b>Subject:</b> ${esc(a.subject||"")}</p><div style="white-space:pre-wrap;background:#f8f9fc;padding:12px;border-radius:8px">${esc(a.body||"")}</div><div class="row" style="margin-top:12px"><div><label for="score${t.id}">Marks (0–20)</label><input class="score-input" id="score${t.id}" type="number" min="0" max="20" step="1" value="${scores[t.id]??""}"></div><div><label for="feedback${t.id}">Trainer Feedback</label><input id="feedback${t.id}" value="${esc(feedback[t.id]||"")}" placeholder="Optional feedback"></div></div></div>`}).join("")}<p class="muted">Rubric per task (20 marks): Subject 2, greeting 2, empathy/professional tone 4, policy accuracy 6, clarity/structure 3, next steps and closing 3.</p><div class="actions"><button onclick="saveGrade('${s.id}')">Save Evaluation</button><button class="secondary" onclick="closeReview()">Close</button></div><div id="gradeMsg" class="success"></div>`;
+ $("reviewBox").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function saveGrade(id){
+ const scores={},feedback={};
+ for(const t of TASKS){const v=$("score"+t.id).value;if(v===""||Number(v)<0||Number(v)>20||!Number.isInteger(Number(v))){$("gradeMsg").textContent="Enter a whole-number score from 0 to 20 for every task.";return} scores[t.id]=Number(v);feedback[t.id]=$("feedback"+t.id).value.trim();}
+ api({action:"grade",password:adminKey,id,scores,feedback}).then(r=>{if(!r.ok)throw new Error(r.error||"Could not save evaluation.");$("gradeMsg").textContent=`Saved. Total score: ${r.totalScore}/100 (${r.percentage}%).`;loadSubmissions();}).catch(e=>$("gradeMsg").textContent=e.message);
+}
+function closeReview(){$("reviewBox").classList.add("hidden");$("reviewBox").innerHTML=""}
+function downloadCSV(){
+ const rows=[["Name","Email","Assessment Date","Submitted On","Task","Subject","Email Response","Score","Feedback"]];
+ submissions.forEach(s=>TASKS.forEach(t=>{const a=(s.answers||[]).find(x=>Number(x.taskId)===t.id)||{};rows.push([s.name,s.email,s.assessmentDate,s.submittedOn,t.title,a.subject||"",a.body||"",s.scores?.[t.id]??"",s.feedback?.[t.id]??""])}));
+ const csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");
+ const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="PayRupik_Email_Assessment.csv";a.click();URL.revokeObjectURL(url);
+}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+</script>
+</body>
+</html>
